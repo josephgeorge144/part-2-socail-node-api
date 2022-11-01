@@ -1,6 +1,8 @@
 const router = require("express").Router();
 
+const Post = require("../models/Post");
 const Posts = require("../models/Post");
+const User = require("../models/User");
 //create post
 router.post("/", async (req, res) => {
   const newPost = new Posts(req.body);
@@ -10,7 +12,7 @@ router.post("/", async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
-  res.status(200).json("hii");
+  
 });
 
 //update post
@@ -75,4 +77,25 @@ router.put("/:id/like", async (req, res) => {
 
   });
   
+
+    //timeline
+
+    router.get('/timeline/all',async(req,res)=>{
+        try{
+            const currentUser=await User.findById(req.body.userId);
+            const userPosts=await Posts.find({userId:currentUser._id})
+            const friendPosts=await Promise.all(
+                currentUser.followins.map((friendId)=>( Posts.find({userId:friendId})) )
+            );
+
+            console.log(friendPosts);
+
+            res.status(200).send(userPosts.concat(...friendPosts))
+
+        }
+        catch (err) {
+            res.status(500).json(err);
+          }
+      
+    })
 module.exports = router;
