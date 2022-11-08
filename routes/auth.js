@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { hash } = require("bcrypt");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const { error } = require("console");
 
 //Register
 router.post("/reg", async (req, res) => {
@@ -17,9 +18,9 @@ router.post("/reg", async (req, res) => {
     });
     //save user in db and response on page
     const user = await data.save();
-    res.status(200).json(user);
+    return  res.status(200).json(user);
   } catch (err) {
-    console.log(err);
+    return  res.status(400).json('user name or email has aleady been taken');
   }
 });
 
@@ -30,14 +31,15 @@ router.post("/login", async (req, res) => {
     // if(user){
     //     res.status(200).send('login details found')
     // }
-    !validPassword && res.status(400).json('wrong password')
-    !user && res.status(404).send("user not found");
+     if(!validPassword ){ return res.status(400).json('wrong password')}
+     if(!user) { return res.status(404).json("user not found");}
 
-    res.status(200).send(user)
+     return res.status(200).send(user)
     console.log(user);
   } catch(err) {
+    console.log(err)
 
-    res.status(500).json(err);
+    res.status(500).json("user not found");
 
   }
 });
