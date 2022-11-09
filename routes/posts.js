@@ -6,6 +6,7 @@ const User = require("../models/User");
 //create post
 router.post("/", async (req, res) => {
   const newPost = new Posts(req.body);
+  console.log(newPost);
   try {
     const savedPost = await newPost.save();
     res.status(200).json(savedPost);
@@ -80,9 +81,9 @@ router.put("/:id/like", async (req, res) => {
 
     //timeline
 
-    router.get('/timeline/all',async(req,res)=>{
+    router.get('/timeline/:userId',async(req,res)=>{
         try{
-            const currentUser=await User.findById(req.body.userId);
+            const currentUser=await User.findById(req.params.userId);
             const userPosts=await Posts.find({userId:currentUser._id})
             const friendPosts=await Promise.all(
                 currentUser.followins.map((friendId)=>( Posts.find({userId:friendId})) )
@@ -98,4 +99,21 @@ router.put("/:id/like", async (req, res) => {
           }
       
     })
+
+    //get users posts of user(when we open thier profile)
+    router.get('/profile/:username',async(req,res)=>{
+      console.log(req.params.username);
+      try{  
+          const user=await User.find({username:req.params.username});
+          const userPosts=await Posts.find({userId:user[0]._id})
+          console.log(user)
+
+          res.status(200).json(userPosts)
+
+      }
+      catch (err) {
+          res.status(500).json('thetti');
+        }
+    
+  })
 module.exports = router;
